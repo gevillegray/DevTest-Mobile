@@ -1,11 +1,25 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Button} from 'react-native';
+//Components
 import IncrementButton from './components/IncrementButton'
 
 export default function App() {
+
+  const getJson = async () => {
+      const response = await fetch('https://devapi.inertia.systems/devtest/lunchspecials.php');
+      const json = await response.json();
+      console.log(json);
+      return (json);
+  }
+
   return (
     <View style={styles.container}>
-      <IncrementButton />
+      <IncrementButton/>
+      <Button
+        title = "test"
+      />
+
+
     </View>
   );
 }
