@@ -7,10 +7,9 @@ export default function Home({ navigation }) {
   const pressHandler = () => {
     navigation.navigate("LunchSpecials")
   }
-  
+
   return (
     <View style={styles.container}>
-
       <IncrementButton/>
       <Button
         title = "Lunch Specials"
