@@ -1,78 +1,106 @@
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Text, View, TextInput, StyleSheet, Button} from 'react-native';
+import React, { Component } from 'react';
+import { View, Text, FlatList, Button, StyleSheet} from 'react-native';
+import { ListItem, SearchBar } from 'react-native-elements';
 
-export default LunchSpecials = () => {
-  const [isLoading, setLoading] = useState(true);
-  const [data, setData] = useState([]);
-  var headTable = ['id', 'name', 'dish'];
+class LunchSpecials extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      loading: false,
+      data: [],
+      temp: [],
+      error: null,
+      searchText: null,
+      idDescending: true,
+    };
+  }
 
-  useEffect(() => {
-    fetch('https://devapi.inertia.systems/devtest/lunchspecials.php')
-      .then((response) => response.json())
-      .then((json) => setData(json.body.lunchspecials))
-      .catch((error) => console.error(error))
-      .finally(() => setLoading(false));
-  });
+  componentDidMount() {
+    this.getData();
+  }
 
-  return (
-    <View style={{ flex: 1, padding: 24 }}>
-      <TextInput
-            style={styles.textInputStyle}
-            // onChangeText={text => this.SearchFilterFunction(text)}
-            // value={this.state.text}
-            underlineColorAndroid="transparent"
-            placeholder="Search Here"
-      />
-      <View style={styles.button}>
-          <Button title = "ID"/>
-          <Button title = "Restaurant"/>
-          <Button title = "Dish"/>
-      </View>
-      {isLoading ? <ActivityIndicator/> : (
-        <View>
-          <FlatList
-            data={data}
-            keyExtractor={({ id }, index) => id}
-            renderItem={({ item }) => (
-              <View style={styles.container}>
+  getData = async () => {
+    const url = "https://devapi.inertia.systems/devtest/lunchspecials.php";
+    this.setState({loading: true});
+    try {
+      const response = await fetch (url);
+      const json = await response.json();
+      this.setResult(json.body.lunchspecials);
+    } catch (e) {
+      this.setState({loading: flase, error:'Error Loading Restaurants'});
+    }
+  };
+
+  setResult = (res) => {
+    this.setState({
+      data: [...this.state.data, ...res],
+      temp: [...this.state.data, ...res],
+    });
+  };
+
+  updateSearch = (searchText) => {
+    this.setState({searchText}, () => {
+      if ('' == searchText) {
+        this.setState({
+          data: [...this.state.temp],
+        });
+        return;
+      }
+      this.state.data = this.state.temp.filter(function (item) {
+        return (item.name.includes(searchText) || item.dish.includes(searchText));
+      })
+      .map(function({id, name, dish}) {
+        return {id, name, dish};
+      });
+    });
+  };
+
+
+  render(){
+    return (
+      <View>
+        <SearchBar placeholder ="Search ..."
+        lightTheme round editable = {true}
+        value = {this.state.searchText}
+        onChangeText={this.updateSearch}
+        />
+        <View style={styles.button}>
+           <Button
+             title = "ID"
+           />
+           <Button title = "Restaurant"/>
+           <Button title = "Dish"/>
+         </View>
+
+        <FlatList
+          data={this.state.data}
+          keyExtractor={item => item.id}
+          renderItem={({item}) => (
+            <View style={styles.container}>
                 <Text>{item.id}</Text>
                 <Text style ={styles.paragraph}>{item.name}</Text>
                 <Text>{item.dish}</Text>
-              </View>
-            )}
-          />
-        </View>
-      )}
+            </View>
+
+          )}
+        />
       </View>
-  );
-};
+    );
+  }
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'space-between',
-    backgroundColor: '#ecf0f1',
     flexDirection:'row',
     alignItems:'baseline',
   },
-  textInputStyle: {
-    height: 40,
-    borderWidth: 1,
-    paddingLeft: 10,
-    borderColor: '#009688',
-    backgroundColor: '#FFFFFF',
-  },
-  paragraph: {
-   margin: 24,
-   fontSize: 16,
-   marginVertical: 4,
-   textAlign: 'center',
- },
- button: {
-   flex: 1,
+  button: {
    justifyContent: 'space-between',
    backgroundColor: '#ecf0f1',
    flexDirection:'row',
    alignItems:'baseline',
  },
 });
+export default LunchSpecials;

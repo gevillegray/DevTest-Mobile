@@ -4,6 +4,7 @@ import IncrementButton from './components/IncrementButton'
 import Navigator from './routes/homeStack';
 
 export default function App() {
+  console.disableYellowBox = true;
   return (
     <Navigator/>
   );
